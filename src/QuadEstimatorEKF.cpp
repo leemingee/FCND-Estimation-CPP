@@ -253,12 +253,11 @@ void QuadEstimatorEKF::Predict(float dt, V3F accel, V3F gyro)
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
   gPrime(0, 3) = gPrime(1, 4) = gPrime(2, 5) = dt;
 
-  V3F accel_dt = accel * dt;
+  auto accel_dt = accel * dt;
 
   gPrime(3, 6) = (RbgPrime(0) * accel).sum() * dt;
   gPrime(4, 6) = (RbgPrime(1) * accel).sum() * dt;
   gPrime(5, 6) = (RbgPrime(2) * accel).sum() * dt;
-
 
   ekfCov = gPrime * ekfCov * gPrime.transpose() + Q;
 
@@ -306,7 +305,11 @@ void QuadEstimatorEKF::UpdateFromMag(float magYaw)
   //    (you don't want to update your yaw the long way around the circle)
   //  - The magnetomer measurement covariance is available in member variable R_Mag
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
+  hPrime(0, 6) = 1;
+  zFromX(0) = ekfState(6);
 
+  if (magYaw - ekfState(6) > F_PI) zFromX(0) += 2.f*F_PI;
+  if (magYaw - ekfState(6) < -F_PI) zFromX(0) -= 2.f*F_PI;
 
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
